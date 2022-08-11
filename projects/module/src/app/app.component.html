@@ -22,11 +22,19 @@
                     <mat-option value="*">Unbounded</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaCleanLog" fxFlexAlign="center" class="slider"><span class="font">process only <i>complete</i> events</span></mat-slide-toggle>
-            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaDistinguishSameEvents" fxFlexAlign="center" class="slider"><span class="font">distinguish same events</span></mat-slide-toggle>
-            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaStartStop" fxFlexAlign="center" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
-            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaRemovePrefixes" fxFlexAlign="center" class="slider"><span class="font">remove prefix traces</span></mat-slide-toggle>
+            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaCleanLog" class="slider"><span class="font">process only <i>complete</i> events</span></mat-slide-toggle>
+            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaDistinguishSameEvents" class="slider"><span class="font">distinguish same events</span></mat-slide-toggle>
+            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaStartStop" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
+            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaRemovePrefixes" class="slider"><span class="font">remove prefix traces</span></mat-slide-toggle>
         </div>
+
+        <div fxLayout="column" fxLayoutAlign="center center">
+            <span class="settings-title">Region synthesis configuration</span>
+            <mat-slide-toggle [formControl]="fcOneBound" class="slider"><span class="font">one-bound regions</span></mat-slide-toggle>
+            <mat-slide-toggle [formControl]="fcEmptyRegions" class="slider"><span class="font">empty at the end</span></mat-slide-toggle>
+        </div>
+
+        <ilpn-file-download descriptionText="click to download synthesised nets" [fileDisplay]="fdPn" [disabled]="processing || nets.length === 0" [files]="nets"></ilpn-file-download>
     </div>
 
 </ilpn-page-layout>

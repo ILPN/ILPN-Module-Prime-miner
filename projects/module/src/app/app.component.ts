@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {APP_BASE_HREF} from '@angular/common';
 import {
     AbelOracleService, AlphaOracleService, DropFile, FD_LOG,
-    LogToPartialOrderTransformerService, PetriNet, Trace, XesLogParserService
+    LogToPartialOrderTransformerService, PetriNet, Trace, XesLogParserService, PrimeMinerService, FD_PETRI_NET, PetriNetSerialisationService
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 import {Observable, of} from 'rxjs';
@@ -19,6 +19,7 @@ import {Observable, of} from 'rxjs';
 export class AppComponent {
 
     public fdLog = FD_LOG;
+    public fdPn = FD_PETRI_NET;
 
     public fcOracle: FormControl;
     public fcAlphaLookAheadDistance: FormControl;
@@ -27,24 +28,51 @@ export class AppComponent {
     public fcAlphaStartStop: FormControl;
     public fcAlphaRemovePrefixes: FormControl;
 
+    public fcOneBound: FormControl;
+    public fcEmptyRegions: FormControl;
+
     public log: Array<Trace> | undefined;
+    public nets: Array<DropFile> = [];
+    public processing = false;
 
     constructor(private _logParser: XesLogParserService,
                 private _αbelOracle: AbelOracleService,
                 private _alphaOracle: AlphaOracleService,
-                private _logTransformer: LogToPartialOrderTransformerService) {
+                private _logTransformer: LogToPartialOrderTransformerService,
+                private _primeMiner: PrimeMinerService,
+                private _netSerializer: PetriNetSerialisationService) {
         this.fcOracle = new FormControl('alpha');
         this.fcAlphaLookAheadDistance = new FormControl('1');
         this.fcAlphaCleanLog = new FormControl(true);
         this.fcAlphaDistinguishSameEvents = new FormControl(false);
         this.fcAlphaStartStop = new FormControl(false);
         this.fcAlphaRemovePrefixes = new FormControl(true);
+
+        this.fcOneBound = new FormControl(false);
+        this.fcEmptyRegions = new FormControl(false);
     }
 
     public processLogUpload(files: Array<DropFile>) {
+        this.processing = true;
+        this.nets = [];
+
         this.log = this._logParser.parse(files[0].content);
+        console.debug(this.log);
         this.convertLogToPOs().subscribe(pos => {
             console.debug(pos);
+            this._primeMiner.mine(pos, {
+                oneBoundRegions: this.fcOneBound.value,
+                noOutputPlaces: this.fcEmptyRegions.value
+            }).subscribe({
+                next: net => {
+                    console.debug(net);
+                    this.nets.push(new DropFile(`net${this.nets.length + 1}.pn`, this._netSerializer.serialise(net)));
+                },
+                complete: () => {
+                    this.processing = false;
+                    console.debug('done');
+                }
+            });
         });
     }
 
