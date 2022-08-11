@@ -1,9 +1,9 @@
 <ilpn-page-layout>
-    <h2>TODO title</h2>
+    <h2>Prime miner</h2>
     <hr>
 
     <div fxLayout="row wrap" fxLayoutAlign="space-evenly start">
-
+        <ilpn-file-upload descriptionText="Drop a XES log file here" [fileDisplay]="fdLog" (fileContent)="processLogUpload($event)"></ilpn-file-upload>
     </div>
 
 </ilpn-page-layout>
