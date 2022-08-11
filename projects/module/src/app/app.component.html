@@ -22,7 +22,10 @@
                     <mat-option value="*">Unbounded</mat-option>
                 </mat-select>
             </mat-form-field>
+            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaCleanLog" fxFlexAlign="center" class="slider"><span class="font">process only <i>complete</i> events</span></mat-slide-toggle>
             <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaDistinguishSameEvents" fxFlexAlign="center" class="slider"><span class="font">distinguish same events</span></mat-slide-toggle>
+            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaStartStop" fxFlexAlign="center" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
+            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaRemovePrefixes" fxFlexAlign="center" class="slider"><span class="font">remove prefix traces</span></mat-slide-toggle>
         </div>
     </div>
 

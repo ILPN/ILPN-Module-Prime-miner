@@ -18,14 +18,20 @@ export class AppComponent {
 
     public fcOracle: FormControl;
     public fcAlphaLookAheadDistance: FormControl;
+    public fcAlphaCleanLog: FormControl;
     public fcAlphaDistinguishSameEvents: FormControl;
+    public fcAlphaStartStop: FormControl;
+    public fcAlphaRemovePrefixes: FormControl;
 
     public log: Array<Trace> | undefined;
 
     constructor(private _logParser: XesLogParserService) {
         this.fcOracle = new FormControl('alpha');
         this.fcAlphaLookAheadDistance = new FormControl('1');
+        this.fcAlphaCleanLog = new FormControl(true);
         this.fcAlphaDistinguishSameEvents = new FormControl(false);
+        this.fcAlphaStartStop = new FormControl(false);
+        this.fcAlphaRemovePrefixes = new FormControl(true);
     }
 
     public processLogUpload(files: Array<DropFile>) {
