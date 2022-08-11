@@ -1,7 +1,11 @@
 import {Component} from '@angular/core';
 import {APP_BASE_HREF} from '@angular/common';
-import {DropFile, FD_LOG, Trace, XesLogParserService} from 'ilpn-components';
+import {
+    AbelOracleService, AlphaOracleService, DropFile, FD_LOG,
+    LogToPartialOrderTransformerService, PetriNet, Trace, XesLogParserService
+} from 'ilpn-components';
 import {FormControl} from '@angular/forms';
+import {Observable, of} from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -25,7 +29,10 @@ export class AppComponent {
 
     public log: Array<Trace> | undefined;
 
-    constructor(private _logParser: XesLogParserService) {
+    constructor(private _logParser: XesLogParserService,
+                private _αbelOracle: AbelOracleService,
+                private _alphaOracle: AlphaOracleService,
+                private _logTransformer: LogToPartialOrderTransformerService) {
         this.fcOracle = new FormControl('alpha');
         this.fcAlphaLookAheadDistance = new FormControl('1');
         this.fcAlphaCleanLog = new FormControl(true);
@@ -36,5 +43,26 @@ export class AppComponent {
 
     public processLogUpload(files: Array<DropFile>) {
         this.log = this._logParser.parse(files[0].content);
+        this.convertLogToPOs().subscribe(pos => {
+            console.debug(pos);
+        });
+    }
+
+    private convertLogToPOs(): Observable<Array<PetriNet>> {
+        if (this.fcOracle.value === 'alpha') {
+            const concurrency = this._alphaOracle.determineConcurrency(this.log!, {
+                distinguishSameLabels: this.fcAlphaDistinguishSameEvents.value,
+                lookAheadDistance: this.fcAlphaLookAheadDistance.value === '*' ? Number.POSITIVE_INFINITY : Number.parseInt(this.fcAlphaLookAheadDistance.value),
+            });
+            const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
+                cleanLog: this.fcAlphaCleanLog.value,
+                discardPrefixes: this.fcAlphaRemovePrefixes.value,
+                addStartStopEvent: this.fcAlphaStartStop.value
+            });
+            return of(pos);
+        } else {
+            // αbel
+            return this._αbelOracle.determineConcurrency(this.log!);
+        }
     }
 }
