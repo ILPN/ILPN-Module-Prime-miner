@@ -38,7 +38,7 @@
             <mat-slide-toggle [formControl]="fcEmptyRegions" class="slider"><span class="font">empty at the end</span></mat-slide-toggle>
         </div>
 
-        <ilpn-file-download descriptionText="click to download synthesised nets" [fileDisplay]="fdPn" [disabled]="processing || nets.length === 0" [files]="nets"></ilpn-file-download>
+        <ilpn-file-download descriptionText="click to download synthesised nets" [fileDisplay]="fdPn" [disabled]="processing || resultFiles.length === 0" [files]="resultFiles"></ilpn-file-download>
     </div>
 
 </ilpn-page-layout>

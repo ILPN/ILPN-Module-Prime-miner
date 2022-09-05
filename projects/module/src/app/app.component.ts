@@ -1,7 +1,18 @@
 import {Component} from '@angular/core';
 import {
-    AbelOracleService, AlphaOracleService, DropFile, FD_LOG,
-    LogToPartialOrderTransformerService, PetriNet, Trace, XesLogParserService, PrimeMinerService, FD_PETRI_NET, PetriNetSerialisationService
+    AbelOracleService,
+    AlgorithmResult,
+    AlphaOracleService,
+    DropFile,
+    FD_LOG,
+    LogToPartialOrderTransformerService,
+    PetriNet,
+    Trace,
+    XesLogParserService,
+    PrimeMinerResult,
+    PrimeMinerService,
+    FD_PETRI_NET,
+    PetriNetSerialisationService
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 import {Observable, of} from 'rxjs';
@@ -27,7 +38,7 @@ export class AppComponent {
     public fcEmptyRegions: FormControl;
 
     public log: Array<Trace> | undefined;
-    public nets: Array<DropFile> = [];
+    public resultFiles: Array<DropFile> = [];
     public processing = false;
 
     constructor(private _logParser: XesLogParserService,
@@ -49,21 +60,37 @@ export class AppComponent {
 
     public processLogUpload(files: Array<DropFile>) {
         this.processing = true;
-        this.nets = [];
+        this.resultFiles = [];
+
+        const algorithmProtocol = new AlgorithmResult("prime miner");
+        let totalTraces = 0;
 
         this.log = this._logParser.parse(files[0].content);
         console.debug(this.log);
         this.convertLogToPOs().subscribe(pos => {
+            pos.sort((a, b) => (b?.frequency ?? 0) - (a?.frequency ?? 0));
+
+            let i = 1;
+            for (const po of pos) {
+                const f = po.frequency ?? 0;
+                totalTraces += f;
+                algorithmProtocol.addOutputLine(`PO ${i} - ${f} trace${f !== 1 ? 's' : ''}`);
+                i++;
+            }
+
             console.debug(pos);
             this._primeMiner.mine(pos, {
                 oneBoundRegions: this.fcOneBound.value,
                 noOutputPlaces: this.fcEmptyRegions.value
             }).subscribe({
-                next: net => {
-                    console.debug(net);
-                    this.nets.push(new DropFile(`net${this.nets.length + 1}.pn`, this._netSerializer.serialise(net)));
+                next: result => {
+                    const i = this.resultFiles.length + 1;
+                    algorithmProtocol.addOutputLine(this.formatModelReplayabilityReport(result, i, totalTraces, pos));
+                    console.debug(result);
+                    this.resultFiles.push(new DropFile(`model_${i}.pn`, this._netSerializer.serialise(result.net)));
                 },
                 complete: () => {
+                    this.resultFiles.unshift(new DropFile(`report.txt`, algorithmProtocol.serialise()));
                     this.processing = false;
                     console.debug('done');
                 }
@@ -87,5 +114,20 @@ export class AppComponent {
             // αbel
             return this._αbelOracle.determineConcurrency(this.log!);
         }
+    }
+
+    private formatModelReplayabilityReport(model: PrimeMinerResult, modelIndex: number, totalTraceCount: number, pos: Array<PetriNet>): string {
+        let replayableTraceCount = 0;
+        model.supportedPoIndices.forEach(i => {
+            replayableTraceCount += pos[i - 1].frequency ?? 0;
+        })
+
+        let report = `Model ${modelIndex}`;
+        if (totalTraceCount > 0) {
+            report += ` ${(replayableTraceCount/totalTraceCount * 100).toFixed(2)}% of traces`;
+        }
+        report += ` POs ${model.supportedPoIndices.join(', ')}`;
+
+        return report;
     }
 }
