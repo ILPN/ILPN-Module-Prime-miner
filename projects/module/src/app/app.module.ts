@@ -7,6 +7,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatSelectModule} from '@angular/material/select';
+import {APP_BASE_HREF, PlatformLocation} from '@angular/common';
 
 @NgModule({
     declarations: [
@@ -21,7 +22,13 @@ import {MatSelectModule} from '@angular/material/select';
         BrowserAnimationsModule,
         MatSelectModule,
     ],
-    providers: [],
+    providers: [
+        {
+            provide: APP_BASE_HREF,
+            useFactory: (s: PlatformLocation) => s.getBaseHrefFromDOM(),
+            deps: [PlatformLocation]
+        }
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule {
