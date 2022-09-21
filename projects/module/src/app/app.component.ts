@@ -28,7 +28,6 @@ export class AppComponent {
 
     public fcOracle: FormControl;
     public fcAlphaDistinguishSameEvents: FormControl;
-    public fcAlphaStartStop: FormControl;
 
     public log: Array<Trace> | undefined;
     public resultFiles: Array<DropFile> = [];
@@ -41,7 +40,6 @@ export class AppComponent {
                 private _netSerializer: PetriNetSerialisationService) {
         this.fcOracle = new FormControl('none');
         this.fcAlphaDistinguishSameEvents = new FormControl(false);
-        this.fcAlphaStartStop = new FormControl(false);
     }
 
     public processLogUpload(files: Array<DropFile>) {
@@ -93,7 +91,7 @@ export class AppComponent {
             const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
                 cleanLog: true,
                 discardPrefixes: true,
-                addStartStopEvent: this.fcAlphaStartStop.value
+                addStartStopEvent: false
             });
             return of(pos);
         } else {
