@@ -27,11 +27,8 @@ export class AppComponent {
     public fdPn = FD_PETRI_NET;
 
     public fcOracle: FormControl;
-    public fcAlphaCleanLog: FormControl;
     public fcAlphaDistinguishSameEvents: FormControl;
     public fcAlphaStartStop: FormControl;
-
-    public fcEmptyRegions: FormControl;
 
     public log: Array<Trace> | undefined;
     public resultFiles: Array<DropFile> = [];
@@ -43,11 +40,8 @@ export class AppComponent {
                 private _primeMiner: PrimeMinerService,
                 private _netSerializer: PetriNetSerialisationService) {
         this.fcOracle = new FormControl('none');
-        this.fcAlphaCleanLog = new FormControl(true);
         this.fcAlphaDistinguishSameEvents = new FormControl(false);
         this.fcAlphaStartStop = new FormControl(false);
-
-        this.fcEmptyRegions = new FormControl(false);
     }
 
     public processLogUpload(files: Array<DropFile>) {
@@ -73,7 +67,7 @@ export class AppComponent {
             console.debug(pos);
             this._primeMiner.mine(pos, {
                 oneBoundRegions: true,
-                noOutputPlaces: this.fcEmptyRegions.value
+                noOutputPlaces: false
             }).subscribe({
                 next: result => {
                     const i = this.resultFiles.length + 1;
@@ -97,7 +91,7 @@ export class AppComponent {
                 lookAheadDistance: this.fcOracle.value === 'none' ? 0 : 1,
             });
             const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
-                cleanLog: this.fcAlphaCleanLog.value,
+                cleanLog: true,
                 discardPrefixes: true,
                 addStartStopEvent: this.fcAlphaStartStop.value
             });

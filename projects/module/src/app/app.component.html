@@ -19,12 +19,8 @@
                     <mat-option value="timestamp">timestamp oracle</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaCleanLog" class="slider"><span class="font">process only <i>complete</i> events</span></mat-slide-toggle>
             <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaDistinguishSameEvents" class="slider"><span class="font">distinguish same events</span></mat-slide-toggle>
             <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaStartStop" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
-
-            <span class="settings-title margin-top">Region synthesis configuration</span>
-            <mat-slide-toggle [formControl]="fcEmptyRegions" class="slider"><span class="font">empty at the end</span></mat-slide-toggle>
         </div>
 
         <ilpn-file-download descriptionText="click to download synthesised nets" [fileDisplay]="fdPn" [disabled]="processing || resultFiles.length === 0" [files]="resultFiles"></ilpn-file-download>
