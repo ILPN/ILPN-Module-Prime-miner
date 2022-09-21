@@ -10,31 +10,20 @@
         <ilpn-file-upload descriptionText="Drop a XES log file here" [fileDisplay]="fdLog" [showText]="log === undefined" (fileContent)="processLogUpload($event)"></ilpn-file-upload>
 
         <div fxLayout="column" fxLayoutAlign="center center">
-            <span class="settings-title">Oracle configuration</span>
+            <span class="settings-title">Choose a concurrency oracle</span>
             <mat-form-field appearance="fill">
                 <mat-label>Concurrency oracle</mat-label>
                 <mat-select [formControl]="fcOracle">
+                    <mat-option value="none">none</mat-option>
                     <mat-option value="alpha">α oracle</mat-option>
-                    <mat-option value="abel">αbel oracle</mat-option>
-                </mat-select>
-            </mat-form-field>
-            <mat-form-field appearance="fill" *ngIf="fcOracle.value === 'alpha'">
-                <mat-label>Parallelism look-ahead distance</mat-label>
-                <mat-select [formControl]="fcAlphaLookAheadDistance">
-                    <mat-option value="0">Zero</mat-option>
-                    <mat-option value="1">One</mat-option>
-                    <mat-option value="*">Unbounded</mat-option>
+                    <mat-option value="timestamp">timestamp oracle</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaCleanLog" class="slider"><span class="font">process only <i>complete</i> events</span></mat-slide-toggle>
             <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaDistinguishSameEvents" class="slider"><span class="font">distinguish same events</span></mat-slide-toggle>
             <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaStartStop" class="slider"><span class="font">add start/stop events</span></mat-slide-toggle>
-            <mat-slide-toggle *ngIf="fcOracle.value === 'alpha'" [formControl]="fcAlphaRemovePrefixes" class="slider"><span class="font">remove prefix traces</span></mat-slide-toggle>
-        </div>
 
-        <div fxLayout="column" fxLayoutAlign="center center">
-            <span class="settings-title">Region synthesis configuration</span>
-            <mat-slide-toggle [formControl]="fcOneBound" class="slider"><span class="font">one-bound regions</span></mat-slide-toggle>
+            <span class="settings-title margin-top">Region synthesis configuration</span>
             <mat-slide-toggle [formControl]="fcEmptyRegions" class="slider"><span class="font">empty at the end</span></mat-slide-toggle>
         </div>
 
