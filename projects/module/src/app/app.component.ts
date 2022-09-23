@@ -93,7 +93,9 @@ export class AppComponent {
             });
         } else {
             // timestamp
-            concurrency = this._timestampOracle.determineConcurrency(this.log!);
+            concurrency = this._timestampOracle.determineConcurrency(this.log!, {
+                distinguishSameLabels: this.fcAlphaDistinguishSameEvents.value
+            });
         }
         const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
             cleanLog: true,
