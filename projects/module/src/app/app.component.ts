@@ -6,6 +6,7 @@ import {
     FD_LOG,
     LogToPartialOrderTransformerService,
     PetriNet,
+    TimestampOracleService,
     Trace,
     XesLogParserService,
     PrimeMinerResult,
@@ -35,6 +36,7 @@ export class AppComponent {
 
     constructor(private _logParser: XesLogParserService,
                 private _alphaOracle: AlphaOracleService,
+                private _timestampOracle: TimestampOracleService,
                 private _logTransformer: LogToPartialOrderTransformerService,
                 private _primeMiner: PrimeMinerService,
                 private _netSerializer: PetriNetSerialisationService) {
@@ -83,22 +85,22 @@ export class AppComponent {
     }
 
     private convertLogToPOs(): Observable<Array<PetriNet>> {
+        let concurrency;
         if (this.fcOracle.value === 'alpha' || this.fcOracle.value === 'none') {
-            const concurrency = this._alphaOracle.determineConcurrency(this.log!, {
+            concurrency = this._alphaOracle.determineConcurrency(this.log!, {
                 distinguishSameLabels: this.fcAlphaDistinguishSameEvents.value,
                 lookAheadDistance: this.fcOracle.value === 'none' ? 0 : 1,
             });
-            const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
-                cleanLog: true,
-                discardPrefixes: true,
-                addStartStopEvent: false
-            });
-            return of(pos);
         } else {
             // timestamp
-            // TODO
-            return of([]);
+            concurrency = this._timestampOracle.determineConcurrency(this.log!);
         }
+        const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
+            cleanLog: true,
+            discardPrefixes: true,
+            addStartStopEvent: false
+        });
+        return of(pos);
     }
 
     private formatModelReplayabilityReport(model: PrimeMinerResult, modelIndex: number, totalTraceCount: number, pos: Array<PetriNet>): string {
