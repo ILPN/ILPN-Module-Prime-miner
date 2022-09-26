@@ -28,7 +28,6 @@ export class AppComponent {
     public fdPn = FD_PETRI_NET;
 
     public fcOracle: FormControl;
-    public fcAlphaDistinguishSameEvents: FormControl;
 
     public log: Array<Trace> | undefined;
     public resultFiles: Array<DropFile> = [];
@@ -41,7 +40,6 @@ export class AppComponent {
                 private _primeMiner: PrimeMinerService,
                 private _netSerializer: PetriNetSerialisationService) {
         this.fcOracle = new FormControl('none');
-        this.fcAlphaDistinguishSameEvents = new FormControl(false);
     }
 
     public processLogUpload(files: Array<DropFile>) {
@@ -88,14 +86,11 @@ export class AppComponent {
         let concurrency;
         if (this.fcOracle.value === 'alpha' || this.fcOracle.value === 'none') {
             concurrency = this._alphaOracle.determineConcurrency(this.log!, {
-                distinguishSameLabels: this.fcAlphaDistinguishSameEvents.value,
                 lookAheadDistance: this.fcOracle.value === 'none' ? 0 : 1,
             });
         } else {
             // timestamp
-            concurrency = this._timestampOracle.determineConcurrency(this.log!, {
-                distinguishSameLabels: this.fcAlphaDistinguishSameEvents.value
-            });
+            concurrency = this._timestampOracle.determineConcurrency(this.log!);
         }
         const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
             cleanLog: true,
@@ -113,9 +108,9 @@ export class AppComponent {
 
         let report = `Model ${modelIndex}`;
         if (totalTraceCount > 0) {
-            report += ` ${(replayableTraceCount/totalTraceCount * 100).toFixed(2)}% of traces`;
+            report += ` - can replay ${(replayableTraceCount/totalTraceCount * 100).toFixed(2)}% of traces`;
         }
-        report += ` POs ${model.supportedPoIndices.join(', ')}`;
+        report += ` - POs ${model.supportedPoIndices.join(', ')}`;
 
         return report;
     }

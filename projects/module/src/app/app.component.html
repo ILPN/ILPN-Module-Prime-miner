@@ -19,7 +19,6 @@
                     <mat-option value="timestamp">timestamp oracle</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-slide-toggle [formControl]="fcAlphaDistinguishSameEvents" class="slider"><span class="font">distinguish equally labeled events in the same trace</span></mat-slide-toggle>
         </div>
 
         <ilpn-file-download descriptionText="click to download synthesised nets" [fileDisplay]="fdPn" [disabled]="processing || resultFiles.length === 0" [files]="resultFiles"></ilpn-file-download>
