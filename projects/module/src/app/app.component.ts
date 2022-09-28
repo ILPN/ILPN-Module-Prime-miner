@@ -51,7 +51,10 @@ export class AppComponent {
 
         this.log = this._logParser.parse(files[0].content);
         console.debug(this.log);
-        this.convertLogToPOs().subscribe(pos => {
+        this.convertLogToPOs().subscribe(r => {
+            const pos = r.pos;
+            const cleanLog = r.log;
+
             pos.sort((a, b) => (b?.frequency ?? 0) - (a?.frequency ?? 0));
 
             let i = 1;
@@ -63,11 +66,11 @@ export class AppComponent {
             }
 
             console.debug(pos);
-            this._primeMiner.mine(pos, {
+            this._primeMiner.mine(pos, cleanLog, {
                 oneBoundRegions: true,
                 noOutputPlaces: false
             }).subscribe({
-                next: result => {
+                next: (result: PrimeMinerResult) => {
                     const i = this.resultFiles.length + 1;
                     algorithmProtocol.addOutputLine(this.formatModelReplayabilityReport(result, i, totalTraces, pos));
                     console.debug(result);
@@ -82,7 +85,7 @@ export class AppComponent {
         });
     }
 
-    private convertLogToPOs(): Observable<Array<PetriNet>> {
+    private convertLogToPOs(): Observable<{ pos: Array<PetriNet>, log: Array<Trace> }> {
         let concurrency;
         if (this.fcOracle.value === 'alpha' || this.fcOracle.value === 'none') {
             concurrency = this._alphaOracle.determineConcurrency(this.log!, {
@@ -92,23 +95,23 @@ export class AppComponent {
             // timestamp
             concurrency = this._timestampOracle.determineConcurrency(this.log!);
         }
-        const pos = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
+        const [pos, log] = this._logTransformer.transformToPartialOrders(this.log!, concurrency, {
             cleanLog: true,
             discardPrefixes: true,
             addStartStopEvent: false
         });
-        return of(pos);
+        return of({pos, log});
     }
 
     private formatModelReplayabilityReport(model: PrimeMinerResult, modelIndex: number, totalTraceCount: number, pos: Array<PetriNet>): string {
         let replayableTraceCount = 0;
-        model.supportedPoIndices.forEach(i => {
+        model.supportedPoIndices.forEach((i: number) => {
             replayableTraceCount += pos[i - 1].frequency ?? 0;
         })
 
         let report = `Model ${modelIndex}`;
         if (totalTraceCount > 0) {
-            report += ` - can replay ${(replayableTraceCount/totalTraceCount * 100).toFixed(2)}% of traces`;
+            report += ` - can replay ${(replayableTraceCount / totalTraceCount * 100).toFixed(2)}% of traces`;
         }
         report += ` - POs ${model.supportedPoIndices.join(', ')}`;
 
