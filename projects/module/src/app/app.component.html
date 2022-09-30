@@ -24,4 +24,15 @@
         <ilpn-file-download descriptionText="click to download synthesised nets" [fileDisplay]="fdPn" [disabled]="processing || resultFiles.length === 0" [files]="resultFiles"></ilpn-file-download>
     </div>
 
+    <hr>
+    <h2>download examples</h2>
+    <div fxLayout="row wrap" fxLayoutAlign="start start" fxLayout.sm="column" fxLayoutAlign.sm="space-between center">
+        <ilpn-descriptive-link [fileDisplay]="fdLog" title="Repair example" description="from the ProM framework tutorial [1]" link="assets/repairExample.xes" [download]="true" [descriptionLines]="4"></ilpn-descriptive-link>
+        <ilpn-descriptive-link [fileDisplay]="fdLog" title="Reviewing example" description="introduced in Chapter 8 of the Process Mining: Data Science in Action book [1]" link="assets/reviewing.xes" [download]="true" [descriptionLines]="4"></ilpn-descriptive-link>
+        <ilpn-descriptive-link [fileDisplay]="fdLog" title="Teleclaims example" description="introduced in Chapter 8 of the Process Mining: Data Science in Action book [1]" link="assets/teleclaims.xes" [download]="true" [descriptionLines]="4"></ilpn-descriptive-link>
+    </div>
+
+    <br>
+    <span>[1] example XES files were adapted from the originals introduced in Chapter 8 of the <a href="https://link.springer.com/book/10.1007/978-3-662-49851-4">Process Mining: Data Science in Action</a> book by Wil can der Aalst. The original files can be downloaded <a href="http://processmining.org/old-version/event-book.html">here</a></span>
+
 </ilpn-page-layout>
