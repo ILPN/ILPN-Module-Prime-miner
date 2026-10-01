@@ -14,7 +14,7 @@ import {
     PetriNetSerialisationService,
     PartialOrderNetWithContainedTraces
 } from 'ilpn-components';
-import {UntypedFormControl} from '@angular/forms';
+import {FormControl} from '@angular/forms';
 import {Observable, of} from 'rxjs';
 
 @Component({
@@ -27,7 +27,7 @@ export class AppComponent {
     public fdLog = FD_LOG;
     public fdPn = FD_PETRI_NET;
 
-    public fcOracle: UntypedFormControl;
+    public fcOracle = new FormControl('none');
 
     public log: Array<Trace> | undefined;
     public resultFiles: Array<DropFile> = [];
@@ -39,7 +39,6 @@ export class AppComponent {
                 private _logTransformer: LogToPartialOrderTransformerService,
                 private _primeMiner: PrimeMinerService,
                 private _netSerializer: PetriNetSerialisationService) {
-        this.fcOracle = new UntypedFormControl('none');
     }
 
     public processLogUpload(files: Array<DropFile>) {
