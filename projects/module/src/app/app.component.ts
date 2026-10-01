@@ -12,7 +12,8 @@ import {
     PrimeMinerService,
     FD_PETRI_NET,
     PetriNetSerialisationService,
-    PartialOrderNetWithContainedTraces
+    PartialOrder,
+    PnOutputFileFormat
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 import {Observable, of} from 'rxjs';
@@ -27,7 +28,7 @@ export class AppComponent {
     public fdLog = FD_LOG;
     public fdPn = FD_PETRI_NET;
 
-    public fcOracle: FormControl;
+    public fcOracle = new FormControl('none');
 
     public log: Array<Trace> | undefined;
     public resultFiles: Array<DropFile> = [];
@@ -39,7 +40,6 @@ export class AppComponent {
                 private _logTransformer: LogToPartialOrderTransformerService,
                 private _primeMiner: PrimeMinerService,
                 private _netSerializer: PetriNetSerialisationService) {
-        this.fcOracle = new FormControl('none');
     }
 
     public processLogUpload(files: Array<DropFile>) {
@@ -52,11 +52,11 @@ export class AppComponent {
         this.log = this._logParser.parse(files[0].content);
         console.debug(this.log);
         this.convertLogToPOs().subscribe(pos => {
-            pos.sort((a, b) => (b.net?.frequency ?? 0) - (a.net?.frequency ?? 0));
+            pos.sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0));
 
             let i = 1;
             for (const po of pos) {
-                const f = po.net.frequency ?? 0;
+                const f = po.frequency ?? 0;
                 totalTraces += f;
                 algorithmProtocol.addOutputLine(`PO ${i} - ${f} trace${f !== 1 ? 's' : ''}`);
                 i++;
@@ -64,14 +64,14 @@ export class AppComponent {
 
             console.debug(pos);
             this._primeMiner.mine(pos, {
-                oneBoundRegions: true,
+                noArcWeights: true,
                 noOutputPlaces: false
             }).subscribe({
                 next: (result: PrimeMinerResult) => {
                     const i = this.resultFiles.length + 1;
                     algorithmProtocol.addOutputLine(this.formatModelReplayabilityReport(result, i, totalTraces, pos));
                     console.debug(result);
-                    this.resultFiles.push(new DropFile(`model_${i}.pn`, this._netSerializer.serialise(result.net)));
+                    this.resultFiles.push(new DropFile(`model_${i}.json`, this._netSerializer.serialise(result.net, PnOutputFileFormat.JSON)));
                 },
                 complete: () => {
                     this.resultFiles.unshift(new DropFile(`report.txt`, algorithmProtocol.serialise()));
@@ -82,7 +82,7 @@ export class AppComponent {
         });
     }
 
-    private convertLogToPOs(): Observable<Array<PartialOrderNetWithContainedTraces>> {
+    private convertLogToPOs(): Observable<Array<PartialOrder>> {
         let concurrency;
         if (this.fcOracle.value === 'alpha' || this.fcOracle.value === 'none') {
             concurrency = this._alphaOracle.determineConcurrency(this.log!, {
@@ -100,10 +100,10 @@ export class AppComponent {
         return of(pos);
     }
 
-    private formatModelReplayabilityReport(model: PrimeMinerResult, modelIndex: number, totalTraceCount: number, pos: Array<PartialOrderNetWithContainedTraces>): string {
+    private formatModelReplayabilityReport(model: PrimeMinerResult, modelIndex: number, totalTraceCount: number, pos: Array<PartialOrder>): string {
         let replayableTraceCount = 0;
         model.supportedPoIndices.forEach((i: number) => {
-            replayableTraceCount += pos[i - 1].net.frequency ?? 0;
+            replayableTraceCount += pos[i - 1].frequency ?? 0;
         })
 
         let report = `Model ${modelIndex}`;
