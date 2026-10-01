@@ -12,7 +12,8 @@ import {
     PrimeMinerService,
     FD_PETRI_NET,
     PetriNetSerialisationService,
-    PartialOrder
+    PartialOrder,
+    PnOutputFileFormat
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 import {Observable, of} from 'rxjs';
@@ -70,7 +71,7 @@ export class AppComponent {
                     const i = this.resultFiles.length + 1;
                     algorithmProtocol.addOutputLine(this.formatModelReplayabilityReport(result, i, totalTraces, pos));
                     console.debug(result);
-                    this.resultFiles.push(new DropFile(`model_${i}.pn`, this._netSerializer.serialise(result.net)));
+                    this.resultFiles.push(new DropFile(`model_${i}.json`, this._netSerializer.serialise(result.net, PnOutputFileFormat.JSON)));
                 },
                 complete: () => {
                     this.resultFiles.unshift(new DropFile(`report.txt`, algorithmProtocol.serialise()));
