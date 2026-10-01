@@ -12,7 +12,7 @@ import {
     PrimeMinerService,
     FD_PETRI_NET,
     PetriNetSerialisationService,
-    PartialOrderNetWithContainedTraces
+    PartialOrder
 } from 'ilpn-components';
 import {FormControl} from '@angular/forms';
 import {Observable, of} from 'rxjs';
@@ -51,11 +51,11 @@ export class AppComponent {
         this.log = this._logParser.parse(files[0].content);
         console.debug(this.log);
         this.convertLogToPOs().subscribe(pos => {
-            pos.sort((a, b) => (b.net?.frequency ?? 0) - (a.net?.frequency ?? 0));
+            pos.sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0));
 
             let i = 1;
             for (const po of pos) {
-                const f = po.net.frequency ?? 0;
+                const f = po.frequency ?? 0;
                 totalTraces += f;
                 algorithmProtocol.addOutputLine(`PO ${i} - ${f} trace${f !== 1 ? 's' : ''}`);
                 i++;
@@ -63,7 +63,7 @@ export class AppComponent {
 
             console.debug(pos);
             this._primeMiner.mine(pos, {
-                oneBoundRegions: true,
+                noArcWeights: true,
                 noOutputPlaces: false
             }).subscribe({
                 next: (result: PrimeMinerResult) => {
@@ -81,7 +81,7 @@ export class AppComponent {
         });
     }
 
-    private convertLogToPOs(): Observable<Array<PartialOrderNetWithContainedTraces>> {
+    private convertLogToPOs(): Observable<Array<PartialOrder>> {
         let concurrency;
         if (this.fcOracle.value === 'alpha' || this.fcOracle.value === 'none') {
             concurrency = this._alphaOracle.determineConcurrency(this.log!, {
@@ -99,10 +99,10 @@ export class AppComponent {
         return of(pos);
     }
 
-    private formatModelReplayabilityReport(model: PrimeMinerResult, modelIndex: number, totalTraceCount: number, pos: Array<PartialOrderNetWithContainedTraces>): string {
+    private formatModelReplayabilityReport(model: PrimeMinerResult, modelIndex: number, totalTraceCount: number, pos: Array<PartialOrder>): string {
         let replayableTraceCount = 0;
         model.supportedPoIndices.forEach((i: number) => {
-            replayableTraceCount += pos[i - 1].net.frequency ?? 0;
+            replayableTraceCount += pos[i - 1].frequency ?? 0;
         })
 
         let report = `Model ${modelIndex}`;
